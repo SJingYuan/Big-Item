@@ -30,26 +30,8 @@
     </div>
   </div>
   <script src="./js/jquery-1.12.4.min.js"></script>
-  <script>
-    var user = {
-      //发送请求
-      login: function (name, password) {
-        $.post("http://192.168.172.82:8000/admin/login", {
-          "user_name": name,
-          "password": password
-        }).then(function (res) {
-          //判断用户名和密码是否输入错误
-          if (res.status == 200) {
-            // alert('登陆成功');
-            //跳转页面
-            location.href = "./index.html";
-          } else {
-            alert(res.msg);
-          }
-        });
-      },
-    };
-  </script>
+  <!-- 引入模块 -->
+  <script src="./js/util/user.js"></script>
   <script>
     //点击登陆
     //给按钮添加事件
@@ -63,8 +45,23 @@
         return
       };
       // 用户登陆
-      user.login(name, password)
+      user.login(name, password).then(function (res) {
+        //判断用户名和密码是否输入错误
+        if (res.code === 200) {
+          // alert('登陆成功');
+          //跳转页面
+          window.location.href = "./index.html";
+        } else {
+          alert("用户名或密码错误");
+        }
+      });
     });
+    //键盘事件
+    $(".login_form_con").keydown(function (e) {
+      if (e.keyCode == 13) {
+        $("#btnLogin").click();
+      }
+    })
   </script>
 </body>
 

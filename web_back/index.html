@@ -17,11 +17,11 @@
   <div class="sider">
     <a href="#" class="logo"><img src="images/logo02.png" alt="logo"></a>
     <div class="user_info">
-      <img src="images/2.jpg" alt="person">
-      <span>欢迎&nbsp;&nbsp;李思思</span>
+      <img class="userImg" id="toxiang" src="images/2.jpg" alt="person">
+      <span>欢迎&nbsp;&nbsp;<i id="userName" style="font-style: normal;">李思思</i></span>
       <b>管理员</b>
     </div>
-    <div class="menu">
+    <div class=" menu">
       <div class="level01 active"><a href="main_count.html" target="main_frame"><i
             class="iconfont icon-yidiandiantubiao04"></i><span>首页</span></a></div>
       <div class="level01"><a href="#"><i class="iconfont icon-icon-article"></i><span>文章管理</span><b
@@ -49,7 +49,7 @@
     </form>
     <div class="user_center_link">
       <a href="user.html" onclick="setMenu(3,0)" target="main_frame">个人中心</a>
-      <img src="images/2.jpg" alt="person">
+      <img class="userImg" src="images/2.jpg" alt="person">
       <a href="javascript:;" id="btnLogout"><i class="iconfont icon-tuichu"></i> 退出</a>
     </div>
   </div>
@@ -113,26 +113,30 @@
     }
   </script>
 
-
-  <script>
-    var user = {
-      logout: function () {
-        $.post("http://192.168.172.82:8000/admin/logout").then(function (res) {
-          if (res.status == 200) {
-            alert('成功退出');
-          } else {
-            alert(res.msg);
-          }
-        });
-      }
-    };
-  </script>
+  <!-- 引入模块 -->
+  <script src="./js/util/user.js"></script>
   <script>
     //用户退出
     $("#btnLogout").click(function () {
       //用户退出
-      user.logout();
+      user.logout().then(function (res) {
+        if (res.code == 200) {
+          // alert('成功退出');
+          window.location.href = "./login.html"
+        } else {
+          alert(res.msg);
+        }
+      });;
     });
+    // 获取并显示用户的信息
+    user.getInfo().then(function (res) {
+      // console.log(res)
+      if (res.code === 200) {
+        $('#userName').text(res.data.nickname)
+        $(".userImg").attr("src",res.data.user_pic)
+
+      }
+    })
   </script>
 </body>
 
