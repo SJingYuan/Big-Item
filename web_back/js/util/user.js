@@ -1,4 +1,4 @@
-var Url = "http://192.168.172.82:8000";
+var Url = "http://10.253.1.37:8000";
 
 var user = {
   //发送请求
@@ -15,5 +15,5 @@ var user = {
   //获取用户信息
   getInfo: function () {
     return $.get(Url + '/admin/getuser')
-  }
+  },
 };
