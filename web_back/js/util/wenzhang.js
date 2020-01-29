@@ -1,6 +1,6 @@
 // var Url = "http://192.168.172.56:8000";
 // var Url = "http://192.168.124.15:8000";
-var Url = "http://192.168.43.94:8000";
+var Url = "http://localhost:8000";
 var category = {
   //获取数据
   get: function () {

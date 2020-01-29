@@ -1,5 +1,5 @@
 // var Url = "http://10.253.1.37:8000";
-var Url = "http://192.168.43.94:8000";
+var Url = "http://localhost:8000";
 // 
 
 var user = {
