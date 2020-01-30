@@ -30,9 +30,9 @@
 							<option>爱旅行</option> -->
 						</select>
 						<select id="selStatus" name="" class="form-control input-sm">
-							<option value=>所有状态</option>
-							<option value="drafted">草稿</option>
-							<option value="published">已发布</option>
+							<option value="">所有状态</option>
+							<option value="草稿">草稿</option>
+							<option value="已发布">已发布</option>
 						</select>
 						<button id="btnSearch" type="button" class="btn btn-default btn-sm">筛选</button>
 					</form>
@@ -71,7 +71,10 @@
 				</tbody>
 			</table>
 
-			<div class="row text-center">
+			<!-- 提示 -->
+			<h2 id="tips" style="display: none;">暂无数据</h2>
+
+			<div id="pagination_box" class="row text-center">
 				<ul id="pagination-log" class="pagination pagination-sm">
 					<!-- <li class="page-item first disabled"><a href="#" class="page-link">首页</a></li>
 					<li class="page-item prev disabled"><a href="#" class="page-link">上一页</a></li>
@@ -115,7 +118,7 @@
 			<td class="text-center">{{ $value.state }}</td>
 			<td class="text-center">
 				<a href="javascript:;" class="btn btn-default btn-xs">编辑</a>
-				<a href="javascript:deleteTr( 998 );" class="btn btn-danger btn-xs">删除</a>
+				<a href="javascript:;" class="btn btn-danger btn-xs" id="del">删除</a>
 			</td>
 		</tr>
 		{{ /each }}
@@ -130,14 +133,16 @@
 		var visiblecount = 10;
 
 		window.onload = function () {
-			//重置分页组件否则保留上次查询的，一般来说很多问题出现与这三行代码有关如：虽然数据正确但是页码不对仍然为上一次查询出的一致
+			initPage()
+
+			initData(pagenow, visiblecount)
+		}
+
+		function initPage() {
+			// 重置分页组件,否则保留上次查询的，一般来说很多问题出现与这三行代码有关如：虽然数据正确但是页码不对仍然为上一次查询出的一致
 			$('#pagination-log').empty();
 			$('#pagination-log').removeData("twbs-pagination");
 			$('#pagination-log').unbind("page");
-			//将页面的数据容器制空
-			$("#messagebody").empty();
-
-			initData(pagenow, visiblecount)
 		}
 
 		function initData(isPage, isPerpage) {
@@ -146,59 +151,105 @@
 				url: "http://192.168.43.94:8000/admin/search?page=" + isPage + "&perpage=" + isPerpage + "",
 				dataType: "json",
 				success: function (res) {
-					var html = template('articleList', res)
-					$('#list').empty()
-
-					$('#list').append(html)
-
-					totalPage = res.totalPage
-					//后台总页数与可见页数比较如果小于可见页数则可见页数设置为总页数，
-					if (totalPage < visiblecount) {
-						visiblecount = totalPage;
-					}
-
-					$('#pagination-log').twbsPagination({
-						totalPages: totalPage,
-						visiblePages: visiblecount,
-						//页面点击时触发事件
-						onPageClick: function (event, page) {
-							// 将当前页数重置为page
-							pagenow = page
-							initData(pagenow, visiblecount)
-						},
-						first: '首页',
-						prev: '上一页',
-						next: '下一页',
-						last: '尾页',
-						paginationClass: 'pagination',
-						initiateStartPageClick: false,
-					});
+					RenderingTemplate(res)
 				},
 				error: function (err) {
 					console.log(err)
 				}
 			});
-			list.search().then(function (res) {
-				// console.log(res)
-				var Data = res.data;
-				for (let i = 0; i < Data.length; i++) {
+		};
 
-					var str = '<option value="' + Data[i].name + '">' + Data[i].name + '</option>'
-					var str_1 = '<option value="' + Data[i].slug + '">' + Data[i].slug + '</option>'
-					$("#selCategory").append(str);
-					// $("#selStatus").append(str_1);
-				}
-				$("#btnSearch").click(function () {
-					var name = $("#selCategory").val();
-					var slug = $("#selStatus").val();
-					// console.log(name, slug)
-					list.obj(name, slug).then(function () {
+		function RenderingTemplate(isData) {
+			$('#list').empty()
 
-					});
+			if (isData.data.length === 0) {
+				return alert('暂无数据')
+				// return $('#tips').show()
+			}
+
+			// $('#tips').hide()
+			var html = template('articleList', isData)
+
+			$('#list').append(html)
+
+			totalPage = isData.totalPage
+			//后台总页数与可见页数比较如果小于可见页数则可见页数设置为总页数，
+			if (totalPage < visiblecount) {
+				visiblecount = totalPage;
+			} else {
+				// totalPage = (totalPage * visiblecount) / visiblecount
+				visiblecount = 10
+			}
+
+			$('#pagination-log').twbsPagination({
+				totalPages: totalPage,
+				visiblePages: visiblecount,
+				//页面点击时触发事件
+				onPageClick: function (event, page) {
+					// 将当前页数重置为page
+					pagenow = page
+					
+					initData(pagenow, visiblecount)
+				},
+				first: '首页',
+				prev: '上一页',
+				next: '下一页',
+				last: '尾页',
+				paginationClass: 'pagination',
+				initiateStartPageClick: false,
+			});
+		}
+
+		list.search().then(function (res) {
+			// console.log(res)
+			var Data = res.data;
+			for (let i = 0; i < Data.length; i++) {
+
+				var str = '<option value="' + Data[i].name + '">' + Data[i].name + '</option>'
+				var str_1 = '<option value="' + Data[i].slug + '">' + Data[i].slug + '</option>'
+				$("#selCategory").append(str);
+				// $("#selStatus").append(str_1);
+			}
+			$("#btnSearch").click(function () {
+				var name = $("#selCategory").val();
+				var slug = $("#selStatus").val();
+				// console.log(name, slug)
+				// var obj1 = {
+				// 	name: name,
+				// 	slug: slug,
+				// 	visiblecount: visiblecount
+				// }
+				list.obj({
+					name: name,
+					slug: slug,
+					visiblecount: 10
+				}).then(function (res) {
+					initPage()
+					RenderingTemplate(res)
 				});
 			});
+		});
 
-		};
+		$("#list").on('click', "#del", function (e) {
+			var delTips = confirm("您确定要删除吗？");
+			if (!delTips) {
+				return
+			}
+			var currentTr = $(e.target).parents('tr')
+			var Id = currentTr.find('td').eq(1).find('input').val()
+			list.del(Id).then(function (res) {
+				// console.log(res)
+				if (res.code !== 200) {
+					return alert(res.msg);
+				} else {
+					alert(res.msg);
+					// currentTr.remove()
+					
+					// $(e.target).parents('tr').remove();
+					initData($('#pagination-log').find('li[class="page-item active"]').find('a').text(), 10)
+				}
+			})
+		})
 	</script>
 </body>
 
